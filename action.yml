@@ -1,0 +1,4 @@
+name: Icinga DB Docker image
+runs:
+  using: docker
+  image: action.Dockerfile
