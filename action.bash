@@ -8,6 +8,7 @@ mkimg () {
 
 	node /actions/checkout/dist/index.js |grep -vFe ::add-matcher::
 
+	CGO_ENABLED=0 go build -o icingadb .
 	docker build -f /Dockerfile -t "${TARGET}:$TAG" .
 
 	STATE_isPost=1 node /actions/checkout/dist/index.js
