@@ -10,6 +10,7 @@ mkimg () {
 
 	CGO_ENABLED=0 go build -ldflags '-s -w' -o icingadb .
 	upx icingadb
+	bzip2 <etc/schema/mysql/mysql.schema.sql >mysql.schema.sql.bz2
 
 	docker build -f /Dockerfile -t "${TARGET}:$TAG" .
 
