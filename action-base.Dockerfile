@@ -27,7 +27,7 @@ ADD action-base.list /etc/apt/sources.list.d/docker.list
 
 RUN apt-get update ;\
 	apt-get install --no-install-{recommends,suggests} -y \
-		docker-ce-cli nodejs upx ;\
+		bzip2 docker-ce-cli nodejs upx ;\
 	apt-get clean ;\
 	rm -vrf /var/lib/apt/lists/*
 
