@@ -1,3 +1,5 @@
+// Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+
+
 package main
 
 import (

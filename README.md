@@ -1,3 +1,5 @@
+<!-- Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+ -->
+
 # Icinga DB - Docker image
 
 This image integrates [Icinga DB] into your [Docker] environment.
