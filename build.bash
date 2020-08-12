@@ -1,4 +1,5 @@
 #!/bin/bash
+# Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+
 set -exo pipefail
 
 IDBSRC="$1"
