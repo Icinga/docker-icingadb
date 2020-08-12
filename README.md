@@ -53,6 +53,17 @@ host = "2001:db8::192.0.2.18"
 
 Consult the [Icinga DB configuration documentation] on what options there are.
 
+## Build it yourself
+
+```bash
+git clone https://github.com/Icinga/icingadb.git
+#pushd icingadb
+#git checkout v1.0.0
+#popd
+
+./build.bash ./icingadb
+```
+
 [Icinga DB]: https://github.com/Icinga/icingadb
 [Docker]: https://www.docker.com
 [Icinga DB configuration documentation]: https://icinga.com/docs/icingadb/latest/doc/03-Configuration/
