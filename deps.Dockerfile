@@ -11,11 +11,13 @@ RUN ["go", "build", "-ldflags", "-s -w", "."]
 RUN ["upx", "entrypoint"]
 
 
-FROM alpine as empty
+FROM alpine as base
 RUN ["mkdir", "/empty"]
+COPY rootfs /rootfs
+RUN ["chmod", "-R", "u=rwX,go=rX", "/rootfs"]
 
 
 FROM scratch
-COPY rootfs/ /
-COPY --from=empty --chown=icingadb:icingadb /empty /etc/icingadb
+COPY --from=base /rootfs/ /
+COPY --from=base --chown=icingadb:icingadb /empty /etc/icingadb
 COPY --from=entrypoint /entrypoint/entrypoint /entrypoint
