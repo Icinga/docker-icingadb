@@ -35,9 +35,7 @@ func runDaemon() error {
 	cfg := ini.Empty()
 	for _, env := range os.Environ() {
 		if match := myEnv.FindStringSubmatch(env); match != nil {
-			_, errNK := cfg.Section(strings.ToLower(match[1])).NewKey(
-				strings.ToLower(match[2]), strings.ToLower(match[3]),
-			)
+			_, errNK := cfg.Section(strings.ToLower(match[1])).NewKey(strings.ToLower(match[2]), match[3])
 			if errNK != nil {
 				return errNK
 			}
