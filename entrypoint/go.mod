@@ -7,6 +7,6 @@ require (
 	github.com/Icinga/icingadb v1.0.0-rc1
 	github.com/go-ini/ini v1.62.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/sirupsen/logrus v1.7.0
+	github.com/sirupsen/logrus v1.7.1
 	gopkg.in/ini.v1 v1.57.0 // indirect
 )
