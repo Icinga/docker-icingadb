@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout HEAD
+        uses: actions/checkout@v1
+
+      - name: Icinga DB
+        run: git clone https://github.com/Icinga/icingadb.git
+
+      - name: Build
+        run: ./build.bash ./icingadb
