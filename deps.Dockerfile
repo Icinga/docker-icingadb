@@ -20,4 +20,5 @@ RUN ["chmod", "-R", "u=rwX,go=rX", "/rootfs"]
 FROM scratch
 COPY --from=base /rootfs/ /
 COPY --from=base --chown=icingadb:icingadb /empty /etc/icingadb
+COPY --from=base --chown=icingadb:icingadb /empty /data
 COPY --from=entrypoint /entrypoint/entrypoint /entrypoint

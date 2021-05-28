@@ -26,31 +26,26 @@ docker run --rm -d \
 docker run -d \
 	--network icinga \
 	--restart always \
-	-e ICINGADB_LOGGING_LEVEL=debug \
-	-e ICINGADB_REDIS_HOST=redis-icingadb \
-	-e ICINGADB_REDIS_PORT=6379 \
+	-v icingadb:/data \
+	-e ICINGADB_REDIS_ADDRESS=redis-icingadb:6379 \
 	-e ICINGADB_REDIS_PASSWORD=123456 \
-	-e ICINGADB_REDIS_POOL_SIZE=42 \
-	-e ICINGADB_MYSQL_HOST=mariadb-icingadb \
-	-e ICINGADB_MYSQL_PORT=3306 \
-	-e ICINGADB_MYSQL_DATABASE=icingadb \
-	-e ICINGADB_MYSQL_USER=icingadb \
-	-e ICINGADB_MYSQL_PASSWORD=123456 \
-	-e ICINGADB_MYSQL_MAX_OPEN_CONNS=42 \
-	-e ICINGADB_METRICS_HOST=:: \
-	-e ICINGADB_METRICS_PORT=8088 \
+	-e ICINGADB_DATABASE_HOST=mariadb-icingadb \
+	-e ICINGADB_DATABASE_PORT=3306 \
+	-e ICINGADB_DATABASE_DATABASE=icingadb \
+	-e ICINGADB_DATABASE_USER=icingadb \
+	-e ICINGADB_DATABASE_PASSWORD=123456 \
 	icinga/icingadb
 ```
 
-The container doesn't need any volumes and
+The container expects a volume on `/data` and
 takes the environment variables shown above.
 
 Each environment variable corresponds to a configuration option of Icinga DB.
-E.g. `ICINGADB_REDIS_HOST=2001:db8::192.0.2.18` means:
+E.g. `ICINGADB_REDIS_ADDRESS=2001:db8::192.0.2.18` means:
 
-```ini
-[redis]
-host = "2001:db8::192.0.2.18"
+```yaml
+redis:
+  address: 2001:db8::192.0.2.18
 ```
 
 Consult the [Icinga DB configuration documentation] on what options there are.
