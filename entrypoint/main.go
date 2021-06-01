@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 const config = "/etc/icingadb/config.ini"
@@ -74,6 +75,16 @@ func runDaemon() error {
 
 	if err := ioutil.WriteFile(config, yml, 0600); err != nil {
 		return err
+	}
+
+	if sleep := os.Getenv("ICINGADB_SLEEP"); sleep != "" {
+		seconds, err := strconv.ParseUint(sleep, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		log.Info("sleeping")
+		time.Sleep(time.Duration(seconds) * time.Second)
 	}
 
 	if errID := initDb(); errID != nil {

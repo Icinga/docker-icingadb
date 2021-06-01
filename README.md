@@ -50,6 +50,11 @@ redis:
 
 Consult the [Icinga DB configuration documentation] on what options there are.
 
+Icinga DB automatically imports and upgrades the SQL database schema.
+In a HA setup this may lead to a broken database.
+Pass the environment variable `ICINGADB_SLEEP=30` to one of the instances
+to sleep e.g. 30 seconds, so the other instance has this time to finish the upgrade.
+
 ## Build it yourself
 
 ```bash
