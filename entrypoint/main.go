@@ -6,12 +6,17 @@ import (
 	"compress/bzip2"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	icingaSql "github.com/Icinga/go-libs/sql"
 	icingadb "github.com/icinga/icingadb/pkg/config"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -80,6 +85,11 @@ func runDaemon() error {
 	return syscall.Exec("/icingadb", []string{"/icingadb", "-c", config, "--datadir", "/data"}, os.Environ())
 }
 
+type schemaUpgrade struct {
+	version uint64
+	file    string
+}
+
 func initDb() error {
 	log.Debug("checking SQL database")
 
@@ -105,27 +115,51 @@ func initDb() error {
 		return errHS
 	}
 
-	if !hasSchema {
-		log.Debug("importing schema into SQL database")
-
-		file, errOp := os.Open("/mysql.schema.sql.bz2")
-		if errOp != nil {
-			return errOp
+	if hasSchema {
+		version, errGV := getDbSchemaVersion(db)
+		if errGV != nil {
+			return errGV
 		}
 
-		defer file.Close()
-
-		schema, errRA := ioutil.ReadAll(bzip2.NewReader(file))
-		if errRA != nil {
-			return errRA
+		files, errGl := filepath.Glob("/mysql-[0-9]*.sql.bz2")
+		if errGl != nil {
+			return errGl
 		}
 
-		for _, ddl := range sqlStmtSep.Split(string(sqlComment.ReplaceAll(schema, nil)), -1) {
-			if ddl = strings.TrimSpace(ddl); ddl != "" {
-				if _, errEx := db.Exec(ddl); errEx != nil {
-					return errEx
+		var upgrades []schemaUpgrade
+		for _, file := range files {
+			fileVersion, err := strconv.ParseUint(
+				strings.TrimSuffix(strings.TrimPrefix(file, "/mysql-"), ".sql.bz2"), 10, 64,
+			)
+			if err != nil {
+				return err
+			}
+
+			if fileVersion > version {
+				upgrades = append(upgrades, schemaUpgrade{fileVersion, file})
+			}
+		}
+
+		if len(upgrades) > 0 {
+			log.Info("upgrading SQL database schema")
+
+			sort.Slice(upgrades, func(i, j int) bool {
+				return upgrades[i].version < upgrades[j].version
+			})
+
+			for _, upgrade := range upgrades {
+				log.Info(fmt.Sprintf(".. to v%d", upgrade.version))
+
+				if err := importDdl(upgrade.file, db); err != nil {
+					return err
 				}
 			}
+		}
+	} else {
+		log.Info("importing schema into SQL database")
+
+		if err := importDdl("/mysql-schema.sql.bz2", db); err != nil {
+			return err
 		}
 	}
 
@@ -152,4 +186,55 @@ func dbHasSchema(db *sql.DB, dbName string) (bool, error) {
 	}
 
 	return len(res.([]one)) > 0, nil
+}
+
+func getDbSchemaVersion(db *sql.DB) (uint64, error) {
+	type icingadbSchema struct {
+		Version uint64
+	}
+
+	rows, errQr := db.Query(
+		"SELECT version FROM icingadb_schema ORDER BY `timestamp` DESC LIMIT 1",
+	)
+	if errQr != nil {
+		return 0, errQr
+	}
+
+	defer rows.Close()
+
+	res, errFR := icingaSql.FetchRowsAsStructSlice(rows, icingadbSchema{}, -1)
+	if errFR != nil {
+		return 0, errFR
+	}
+
+	versions := res.([]icingadbSchema)
+	if len(versions) < 1 {
+		return 0, errors.New("unknown SQL database schema version")
+	}
+
+	return versions[0].Version, nil
+}
+
+func importDdl(file string, db *sql.DB) error {
+	f, errOp := os.Open(file)
+	if errOp != nil {
+		return errOp
+	}
+
+	defer f.Close()
+
+	schema, errRA := ioutil.ReadAll(bzip2.NewReader(f))
+	if errRA != nil {
+		return errRA
+	}
+
+	for _, ddl := range sqlStmtSep.Split(string(sqlComment.ReplaceAll(schema, nil)), -1) {
+		if ddl = strings.TrimSpace(ddl); ddl != "" {
+			if _, err := db.Exec(ddl); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

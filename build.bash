@@ -30,7 +30,9 @@ cd /idbcp
 
 CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
 upx icingadb
-bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
+
+bzip2 <schema/mysql/schema.sql >mysql-schema.sql.bz2
+bzip2 <schema/mysql/upgrades/1.0.0-rc2.sql >mysql-2.sql.bz2
 
 docker build -f /bldctx/Dockerfile -t icinga/icingadb .
 EOF
