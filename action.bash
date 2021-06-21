@@ -9,9 +9,9 @@ mkimg () {
 
 	node /actions/checkout/dist/index.js |grep -vFe ::add-matcher::
 
-	CGO_ENABLED=0 go build -ldflags '-s -w' -o icingadb .
+	CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
 	upx icingadb
-	bzip2 <etc/schema/mysql/mysql.schema.sql >mysql.schema.sql.bz2
+	bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
 
 	docker build -f /Dockerfile -t "${TARGET}:$TAG" .
 
