@@ -28,9 +28,9 @@ set -exo pipefail
 git -C /idbsrc archive --prefix=idbcp/ HEAD |tar -xC /
 cd /idbcp
 
-CGO_ENABLED=0 go build -ldflags '-s -w' -o icingadb .
+CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
 upx icingadb
-bzip2 </idbsrc/etc/schema/mysql/mysql.schema.sql >mysql.schema.sql.bz2
+bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
 
 docker build -f /bldctx/Dockerfile -t icinga/icingadb .
 EOF

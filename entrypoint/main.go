@@ -5,14 +5,14 @@ package main
 import (
 	"compress/bzip2"
 	"database/sql"
+	"encoding/json"
 	icingaSql "github.com/Icinga/go-libs/sql"
-	icingadb "github.com/Icinga/icingadb/config"
-	"github.com/go-ini/ini"
-	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
+	icingadb "github.com/icinga/icingadb/pkg/config"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -23,27 +23,53 @@ var myEnv = regexp.MustCompile(`(?s)\AICINGADB_(\w+?)_(\w+)=(.*)\z`)
 var sqlComment = regexp.MustCompile(`(?m)^--.*`)
 var sqlStmtSep = regexp.MustCompile(`(?m);$`)
 
+var log = func() *zap.Logger {
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+
+	return logger
+}()
+
 func main() {
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.TraceLevel)
-	log.Fatal(runDaemon())
+	log.Fatal("failed", zap.Error(runDaemon()))
 }
 
 func runDaemon() error {
-	log.Debug("translating env vars to .ini config")
+	log.Debug("translating env vars to YaML config")
 
-	cfg := ini.Empty()
+	cfg := map[string]map[string]interface{}{}
 	for _, env := range os.Environ() {
 		if match := myEnv.FindStringSubmatch(env); match != nil {
-			_, errNK := cfg.Section(strings.ToLower(match[1])).NewKey(strings.ToLower(match[2]), match[3])
-			if errNK != nil {
-				return errNK
+			section := strings.ToLower(match[1])
+
+			sectionCfg, ok := cfg[section]
+			if !ok {
+				sectionCfg = map[string]interface{}{}
+				cfg[section] = sectionCfg
 			}
+
+			rawValue := match[3]
+			var value interface{}
+
+			if parsed, err := strconv.ParseInt(rawValue, 10, 64); err == nil {
+				value = parsed
+			} else {
+				value = rawValue
+			}
+
+			sectionCfg[strings.ToLower(match[2])] = value
 		}
 	}
 
-	if errST := cfg.SaveTo(config); errST != nil {
-		return errST
+	yml, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	if err := ioutil.WriteFile(config, yml, 0600); err != nil {
+		return err
 	}
 
 	if errID := initDb(); errID != nil {
@@ -52,29 +78,30 @@ func runDaemon() error {
 
 	log.Debug("starting actual daemon via exec(3)")
 
-	return syscall.Exec("/icingadb", []string{"/icingadb", "-config", config}, os.Environ())
+	return syscall.Exec("/icingadb", []string{"/icingadb", "-c", config}, os.Environ())
 }
 
 func initDb() error {
 	log.Debug("checking SQL database")
 
-	if errPC := icingadb.ParseConfig(config); errPC != nil {
-		return errPC
+	cfg, errFY := icingadb.FromYAMLFile(config)
+	if errFY != nil {
+		return errFY
 	}
 
-	mi := icingadb.GetMysqlInfo()
-
-	db, errOp := sql.Open("mysql", mi.User+":"+mi.Password+"@tcp("+mi.Host+":"+mi.Port+")/"+mi.Database)
-	if errOp != nil {
-		return errOp
+	idb, errDB := cfg.Database.Open(log.Sugar())
+	if errDB != nil {
+		return errDB
 	}
 
-	defer db.Close()
+	defer idb.Close()
+
+	db := idb.DB.DB
 
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
 
-	hasSchema, errHS := dbHasSchema(db, mi.Database)
+	hasSchema, errHS := dbHasSchema(db, cfg.Database.Database)
 	if errHS != nil {
 		return errHS
 	}
