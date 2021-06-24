@@ -15,8 +15,7 @@ fi
 IDBSRC="$(realpath "$IDBSRC")"
 BLDCTX="$(realpath "$(dirname "$0")")"
 
-docker build -f "${BLDCTX}/action-base.Dockerfile" -t icinga/icingadb-builder "$BLDCTX"
-docker build -f "${BLDCTX}/deps.Dockerfile" -t icinga/icingadb-deps "$BLDCTX"
+docker build -f "${BLDCTX}/action.Dockerfile" -t icinga/icingadb-builder "$BLDCTX"
 
 docker run --rm -i \
 	-v "${IDBSRC}:/idbsrc:ro" \
@@ -31,6 +30,9 @@ cd /idbcp
 CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
 upx icingadb
 bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
+
+cp -r /entrypoint .
+cp -r /rootfs .
 
 docker build -f /bldctx/Dockerfile -t icinga/icingadb .
 EOF

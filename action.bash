@@ -13,6 +13,9 @@ mkimg () {
 	upx icingadb
 	bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
 
+	cp -r /entrypoint .
+	cp -r /rootfs .
+
 	docker build -f /Dockerfile -t "${TARGET}:$TAG" .
 
 	STATE_isPost=1 node /actions/checkout/dist/index.js
