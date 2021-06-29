@@ -37,7 +37,7 @@ func main() {
 }
 
 func runDaemon() error {
-	log.Debug("translating env vars to YaML config")
+	log.Debug("translating env vars to YAML config")
 
 	cfg := map[string]map[string]interface{}{}
 	for _, env := range os.Environ() {
