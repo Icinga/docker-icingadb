@@ -10,7 +10,7 @@ RUN mkdir actions ;\
 	rm -rf *.git
 
 
-FROM golang:buster
+FROM golang:1.16-buster
 SHELL ["/bin/bash", "-exo", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 

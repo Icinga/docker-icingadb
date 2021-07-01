@@ -1,6 +1,6 @@
 # Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+
 
-FROM golang:alpine as entrypoint
+FROM golang:1.16-alpine as entrypoint
 RUN ["sh", "-exo", "pipefail", "-c", "apk add upx; rm -vf /var/cache/apk/*"]
 COPY entrypoint /entrypoint
 
