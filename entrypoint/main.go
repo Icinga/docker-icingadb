@@ -5,6 +5,7 @@ package main
 import (
 	"compress/bzip2"
 	"encoding/json"
+	"fmt"
 	icingaSql "github.com/Icinga/go-libs/sql"
 	icingadb "github.com/icinga/icingadb/pkg/config"
 	"github.com/icinga/icingadb/pkg/driver"
@@ -13,14 +14,15 @@ import (
 	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
+	"path"
 	"regexp"
-	"strconv"
 	"strings"
 	"syscall"
 )
 
-const config = "/etc/icingadb/config.ini"
+const configDir = "/etc/icingadb"
 
+var config = path.Join(configDir, "icingadb.yml")
 var myEnv = regexp.MustCompile(`(?s)\AICINGADB_(\w+?)_(\w+)=(.*)\z`)
 
 var log = func() *zap.Logger {
@@ -50,16 +52,37 @@ func runDaemon() error {
 				cfg[section] = sectionCfg
 			}
 
+			option := strings.ToLower(match[2])
 			rawValue := match[3]
 			var value interface{}
 
-			if parsed, err := strconv.ParseInt(rawValue, 10, 64); err == nil {
-				value = parsed
-			} else {
-				value = rawValue
+			var unJSONed interface{}
+			if json.Unmarshal([]byte(rawValue), &unJSONed) == nil {
+				switch unJSONed.(type) {
+				case bool, float64:
+					value = unJSONed
+				}
 			}
 
-			sectionCfg[strings.ToLower(match[2])] = value
+			if value == nil {
+				if strings.Contains(rawValue, "-----BEGIN") && strings.Count(rawValue, "\n") > 1 {
+					file := path.Join(configDir, fmt.Sprintf("%s_%s.pem", section, option))
+					log.Debug(
+						"writing env var to file",
+						zap.String("var", fmt.Sprintf("ICINGADB_%s_%s", match[1], match[2])), zap.String("file", file),
+					)
+
+					if err := ioutil.WriteFile(file, []byte(rawValue), 0600); err != nil {
+						return err
+					}
+
+					value = file
+				} else {
+					value = rawValue
+				}
+			}
+
+			sectionCfg[option] = value
 		}
 	}
 

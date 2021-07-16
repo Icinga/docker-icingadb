@@ -50,6 +50,31 @@ redis:
 
 Consult the [Icinga DB configuration documentation] on what options there are.
 
+### Connect via TLS
+
+```bash
+docker run -d \
+	--network icinga \
+	--restart always \
+	-e ICINGADB_REDIS_HOST=redis-icingadb \
+	-e ICINGADB_REDIS_PORT=6379 \
+	-e ICINGADB_REDIS_PASSWORD=123456 \
+	-e ICINGADB_REDIS_TLS=true \
+	-e ICINGADB_REDIS_CERT='[PEM-encoded content or path to a file (in a volume)]' \
+	-e ICINGADB_REDIS_KEY='[PEM-encoded content or path to a file (in a volume)]' \
+	-e ICINGADB_REDIS_CA='[PEM-encoded content or path to a file (in a volume)]' \
+	-e ICINGADB_DATABASE_HOST=mariadb-icingadb \
+	-e ICINGADB_DATABASE_PORT=3306 \
+	-e ICINGADB_DATABASE_DATABASE=icingadb \
+	-e ICINGADB_DATABASE_USER=icingadb \
+	-e ICINGADB_DATABASE_PASSWORD=123456 \
+	-e ICINGADB_DATABASE_TLS=true \
+	-e ICINGADB_DATABASE_CERT='[PEM-encoded content or path to a file (in a volume)]' \
+	-e ICINGADB_DATABASE_KEY='[PEM-encoded content or path to a file (in a volume)]' \
+	-e ICINGADB_DATABASE_CA='[PEM-encoded content or path to a file (in a volume)]' \
+	icinga/icingadb
+```
+
 ## Build it yourself
 
 ```bash
