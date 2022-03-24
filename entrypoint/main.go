@@ -4,10 +4,11 @@ package main
 
 import (
 	"compress/bzip2"
-	"database/sql"
 	"encoding/json"
 	icingaSql "github.com/Icinga/go-libs/sql"
 	icingadb "github.com/icinga/icingadb/pkg/config"
+	"github.com/icinga/icingadb/pkg/driver"
+	database "github.com/icinga/icingadb/pkg/icingadb"
 	"github.com/icinga/icingadb/pkg/logging"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -102,7 +103,11 @@ func initDb() error {
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
 
-	hasSchema, errHS := dbHasSchema(db, cfg.Database.Database)
+	hasSchema, errHS := dbHasSchema(idb, map[string]string{
+		driver.MySQL:      cfg.Database.Database,
+		driver.PostgreSQL: "public",
+	}[idb.DriverName()])
+
 	if errHS != nil {
 		return errHS
 	}
@@ -110,7 +115,11 @@ func initDb() error {
 	if !hasSchema {
 		log.Debug("importing schema into SQL database")
 
-		file, errOp := os.Open("/mysql.schema.sql.bz2")
+		file, errOp := os.Open(map[string]string{
+			driver.MySQL:      "/mysql.schema.sql.bz2",
+			driver.PostgreSQL: "/pgsql.schema.sql.bz2",
+		}[idb.DriverName()])
+
 		if errOp != nil {
 			return errOp
 		}
@@ -134,13 +143,14 @@ func initDb() error {
 	return nil
 }
 
-func dbHasSchema(db *sql.DB, dbName string) (bool, error) {
+func dbHasSchema(db *database.DB, dbName string) (bool, error) {
 	type one struct {
 		One uint8
 	}
 
 	rows, errQr := db.Query(
-		"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=? AND TABLE_NAME='icingadb_schema'", dbName,
+		db.Rebind("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=? AND TABLE_NAME='icingadb_schema'"),
+		dbName,
 	)
 	if errQr != nil {
 		return false, errQr
