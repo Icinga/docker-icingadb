@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	icingaSql "github.com/Icinga/go-libs/sql"
 	icingadb "github.com/icinga/icingadb/pkg/config"
+	"github.com/icinga/icingadb/pkg/logging"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
@@ -89,7 +90,7 @@ func initDb() error {
 		return errFY
 	}
 
-	idb, errDB := cfg.Database.Open(log.Sugar())
+	idb, errDB := cfg.Database.Open(&logging.Logger{SugaredLogger: log.Sugar()})
 	if errDB != nil {
 		return errDB
 	}
