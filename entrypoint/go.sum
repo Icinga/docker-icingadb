@@ -1,8 +1,8 @@
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20201218220906-28db891af037/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/Icinga/go-libs v0.0.0-20200629140135-57268fcc7724 h1:EFpnBRHSYZJ+mvo61QfzScB7XR/G3SHUKoqoua2CYRI=
-github.com/Icinga/go-libs v0.0.0-20200629140135-57268fcc7724/go.mod h1:xlgU55MKs/vIg1fMlAEBSrslahYayZNwjXvf3w1dvyA=
+github.com/Icinga/go-libs v0.0.0-20220420130327-ef58ad52edd8 h1:hG4Y/LPERK9i+P8/jnYlq9PeDd9deIkwEWOIimDU3uk=
+github.com/Icinga/go-libs v0.0.0-20220420130327-ef58ad52edd8/go.mod h1:xlgU55MKs/vIg1fMlAEBSrslahYayZNwjXvf3w1dvyA=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=

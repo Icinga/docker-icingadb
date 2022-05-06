@@ -22,8 +22,6 @@ import (
 const config = "/etc/icingadb/config.ini"
 
 var myEnv = regexp.MustCompile(`(?s)\AICINGADB_(\w+?)_(\w+)=(.*)\z`)
-var sqlComment = regexp.MustCompile(`(?m)^--.*`)
-var sqlStmtSep = regexp.MustCompile(`(?m);$`)
 
 var log = func() *zap.Logger {
 	logger, err := zap.NewDevelopment()
@@ -131,11 +129,15 @@ func initDb() error {
 			return errRA
 		}
 
-		for _, ddl := range sqlStmtSep.Split(string(sqlComment.ReplaceAll(schema, nil)), -1) {
-			if ddl = strings.TrimSpace(ddl); ddl != "" {
+		if idb.DriverName() == driver.MySQL {
+			for _, ddl := range icingaSql.MysqlSplitStatements(string(schema)) {
 				if _, errEx := db.Exec(ddl); errEx != nil {
 					return errEx
 				}
+			}
+		} else {
+			if _, errEx := db.Exec(string(schema)); errEx != nil {
+				return errEx
 			}
 		}
 	}
