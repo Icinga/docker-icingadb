@@ -22,7 +22,7 @@ FROM scratch
 COPY --from=base /rootfs/ /
 COPY --from=base --chown=icingadb:icingadb /empty /etc/icingadb
 COPY --from=entrypoint /entrypoint/entrypoint /entrypoint
-COPY icingadb mysql.schema.sql.bz2 /
+COPY icingadb *sql.schema.sql.bz2 /
 
 USER icingadb
 CMD ["/entrypoint"]

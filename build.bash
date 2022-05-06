@@ -30,6 +30,7 @@ cd /idbcp
 CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
 upx icingadb
 bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
+bzip2 <schema/pgsql/schema.sql >pgsql.schema.sql.bz2
 
 cp -r /entrypoint .
 cp -r /rootfs .
