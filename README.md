@@ -26,7 +26,8 @@ docker run --rm -d \
 docker run -d \
 	--network icinga \
 	--restart always \
-	-e ICINGADB_REDIS_ADDRESS=redis-icingadb:6379 \
+	-e ICINGADB_REDIS_HOST=redis-icingadb \
+	-e ICINGADB_REDIS_PORT=6379 \
 	-e ICINGADB_REDIS_PASSWORD=123456 \
 	-e ICINGADB_DATABASE_HOST=mariadb-icingadb \
 	-e ICINGADB_DATABASE_PORT=3306 \
@@ -40,11 +41,11 @@ The container doesn't need any volumes and
 takes the environment variables shown above.
 
 Each environment variable corresponds to a configuration option of Icinga DB.
-E.g. `ICINGADB_REDIS_ADDRESS=redis-icingadb:6379` means:
+E.g. `ICINGADB_REDIS_HOST=redis-icingadb` means:
 
 ```yaml
 redis:
-  address: redis-icingadb:6379
+  host: redis-icingadb
 ```
 
 Consult the [Icinga DB configuration documentation] on what options there are.
