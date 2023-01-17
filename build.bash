@@ -3,6 +3,8 @@
 set -exo pipefail
 
 IDBSRC="$1"
+ACTION="$2"
+TAG="${3:-test}"
 
 if [ -z "$IDBSRC" ]; then
 	cat <<EOF >&2
@@ -22,4 +24,18 @@ if ! docker buildx version; then
 	false
 fi
 
-docker buildx build --load -t icinga/icingadb --build-context "icingadb-git=$(realpath "$IDBSRC")/.git" "$(realpath "$(dirname "$0")")"
+OUR_DIR="$(realpath "$(dirname "$0")")"
+COMMON_ARGS=(-t "icinga/icingadb:$TAG" --build-context "icingadb-git=$(realpath "$IDBSRC")/.git" "$OUR_DIR")
+BUILDX=(docker buildx build --platform "$(cat "${OUR_DIR}/platforms.txt")")
+
+case "$ACTION" in
+	all)
+		"${BUILDX[@]}" "${COMMON_ARGS[@]}"
+		;;
+	push)
+		"${BUILDX[@]}" --push "${COMMON_ARGS[@]}"
+		;;
+	*)
+		docker buildx build --load "${COMMON_ARGS[@]}"
+		;;
+esac
