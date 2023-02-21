@@ -12,28 +12,14 @@ EOF
 	false
 fi
 
-IDBSRC="$(realpath "$IDBSRC")"
-BLDCTX="$(realpath "$(dirname "$0")")"
+if ! docker version; then
+	echo 'Docker not found' >&2
+	false
+fi
 
-docker build -f "${BLDCTX}/action.Dockerfile" -t icinga/icingadb-builder "$BLDCTX"
+if ! docker buildx version; then
+	echo '"docker buildx" not found (see https://docs.docker.com/buildx/working-with-buildx/ )' >&2
+	false
+fi
 
-docker run --rm -i \
-	-v "${IDBSRC}:/idbsrc:ro" \
-	-v "${BLDCTX}:/bldctx:ro" \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	icinga/icingadb-builder bash <<EOF
-set -exo pipefail
-
-git -C /idbsrc archive --prefix=idbcp/ HEAD |tar -xC /
-cd /idbcp
-
-CGO_ENABLED=0 go build -ldflags '-s -w' ./cmd/icingadb
-upx icingadb
-bzip2 <schema/mysql/schema.sql >mysql.schema.sql.bz2
-bzip2 <schema/pgsql/schema.sql >pgsql.schema.sql.bz2
-
-cp -r /entrypoint .
-cp -r /rootfs .
-
-docker build -f /bldctx/Dockerfile -t icinga/icingadb .
-EOF
+docker buildx build --load -t icinga/icingadb --build-context "icingadb-git=$(realpath "$IDBSRC")/.git" "$(realpath "$(dirname "$0")")"

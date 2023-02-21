@@ -1,6 +1,41 @@
 # Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+
 
 name: Icinga DB Docker image
+inputs:
+  dockerhub-token:
+    default: ''
 runs:
-  using: docker
-  image: action.Dockerfile
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+
+    - shell: bash
+      run: docker buildx create --use
+
+    - if: inputs.dockerhub-token != ''
+      env:
+        PW: ${{ inputs.dockerhub-token }}
+      shell: bash
+      run: |
+        docker login -u icingaadmin --password-stdin <<<"$PW"
+
+    - if: github.event_name == 'release'
+      shell: bash
+      run: |
+        TAG="$(tr -d v <<<'${{ github.ref_name }}')"
+        '${{ github.action_path }}/build.bash' .
+        docker tag icinga/icingadb "icinga/icingadb:$TAG"
+        docker push "icinga/icingadb:$TAG"
+
+    - if: github.event_name == 'push'
+      shell: bash
+      run: |
+        TAG="$(tr / - <<<'${{ github.ref_name }}')"
+        '${{ github.action_path }}/build.bash' .
+        docker tag icinga/icingadb "icinga/icingadb:$TAG"
+        docker push "icinga/icingadb:$TAG"
+
+    - if: github.event_name != 'release' && github.event_name != 'push'
+      shell: bash
+      run: |
+        '${{ github.action_path }}/build.bash' .
