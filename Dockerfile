@@ -1,11 +1,8 @@
 # Icinga DB Docker image | (c) 2020 Icinga GmbH | GPLv2+
 
-FROM golang:alpine as go-upx
-RUN ["sh", "-exo", "pipefail", "-c", "apk add git upx; rm -vf /var/cache/apk/*"]
+FROM golang:alpine as icingadb
+RUN ["sh", "-exo", "pipefail", "-c", "apk add git; rm -vf /var/cache/apk/*"]
 ENV CGO_ENABLED 0
-
-
-FROM go-upx as icingadb
 
 COPY --from=icingadb-git . /icingadb-src/.git
 WORKDIR /icingadb-src
@@ -15,13 +12,12 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     ["go", "build", "-ldflags", "-s -w", "./cmd/icingadb"]
 
-RUN ["upx", "icingadb"]
-
 RUN ["bzip2", "-k", "schema/mysql/schema.sql"]
 RUN ["bzip2", "-k", "schema/pgsql/schema.sql"]
 
 
-FROM go-upx as entrypoint
+FROM golang:alpine as entrypoint
+ENV CGO_ENABLED 0
 
 COPY entrypoint /entrypoint
 WORKDIR /entrypoint
@@ -29,8 +25,6 @@ WORKDIR /entrypoint
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     ["go", "build", "-ldflags", "-s -w", "."]
-
-RUN ["upx", "entrypoint"]
 
 
 FROM alpine as base

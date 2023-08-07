@@ -10,6 +10,12 @@ runs:
     - uses: actions/checkout@v3
 
     - shell: bash
+      run: sudo apt-get update
+
+    - shell: bash
+      run: sudo apt-get install -y qemu-user-static binfmt-support
+
+    - shell: bash
       run: docker buildx create --use
 
     - if: inputs.dockerhub-token != ''
@@ -22,20 +28,15 @@ runs:
     - if: github.event_name == 'release'
       shell: bash
       run: |
-        TAG="$(tr -d v <<<'${{ github.ref_name }}')"
-        '${{ github.action_path }}/build.bash' .
-        docker tag icinga/icingadb "icinga/icingadb:$TAG"
-        docker push "icinga/icingadb:$TAG"
+        '${{ github.action_path }}/build.bash' . push "$(tr -d v <<<'${{ github.ref_name }}')"
+        '${{ github.action_path }}/mktags.bash' '${{ github.ref_name }}'
 
     - if: github.event_name == 'push'
       shell: bash
       run: |
-        TAG="$(tr / - <<<'${{ github.ref_name }}')"
-        '${{ github.action_path }}/build.bash' .
-        docker tag icinga/icingadb "icinga/icingadb:$TAG"
-        docker push "icinga/icingadb:$TAG"
+        '${{ github.action_path }}/build.bash' . push "$(tr / - <<<'${{ github.ref_name }}')"
 
     - if: github.event_name != 'release' && github.event_name != 'push'
       shell: bash
       run: |
-        '${{ github.action_path }}/build.bash' .
+        '${{ github.action_path }}/build.bash' . all
