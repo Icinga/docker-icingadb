@@ -3,12 +3,12 @@
 set -exo pipefail
 
 IDBSRC="$1"
-ACTION="$2"
+ACTION="${2:-local}"
 TAG="${3:-test}"
 
 if [ -z "$IDBSRC" ]; then
 	cat <<EOF >&2
-Usage: ${0} /icingadb/source/dir
+Usage: ${0} /icingadb/source/dir [local|all|push [TAG]]
 EOF
 
 	false
