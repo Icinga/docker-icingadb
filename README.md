@@ -26,7 +26,7 @@ docker run --rm -d \
 docker run -d \
 	--network icinga \
 	--restart always \
-        --name icingadb \
+	--name icingadb \
 	-e ICINGADB_REDIS_HOST=redis-icingadb \
 	-e ICINGADB_REDIS_PORT=6379 \
 	-e ICINGADB_REDIS_PASSWORD=123456 \
