@@ -24,7 +24,7 @@ import (
 const configDir = "/etc/icingadb"
 
 var config = path.Join(configDir, "icingadb.yml")
-var myEnv = regexp.MustCompile(`(?s)\AICINGADB_(\w+?)_(\w+)=(.*)\z`)
+var myEnv = regexp.MustCompile(`(?s)\AICINGADB_([-\w]+?)_([-\w]+)=(.*)\z`)
 
 var log = func() *zap.Logger {
 	logger, err := zap.NewDevelopment()
