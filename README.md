@@ -12,7 +12,7 @@ docker network create icinga
 docker run --rm -d \
 	--network icinga \
 	--name redis-icingadb \
-	redis
+	redis redis-server --requirepass 123456
 
 docker run --rm -d \
 	--network icinga \
