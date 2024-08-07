@@ -35,6 +35,10 @@ RUN ["chmod", "-R", "u=rwX,go=rX", "/rootfs"]
 
 FROM scratch
 
+LABEL org.opencontainers.image.documentation='https://icinga.com/docs/icinga-db/latest/doc/01-About/' \
+      org.opencontainers.image.source='https://github.com/Icinga/icingadb' \
+      org.opencontainers.image.licenses='GPL-2.0+'
+
 COPY --from=base /rootfs/ /
 COPY --from=base --chown=icingadb:icingadb /empty /etc/icingadb
 COPY --from=entrypoint /entrypoint/entrypoint /entrypoint
