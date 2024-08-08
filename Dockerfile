@@ -35,7 +35,7 @@ RUN ["chmod", "-R", "u=rwX,go=rX", "/rootfs"]
 
 FROM scratch
 
-LABEL org.opencontainers.image.documentation='https://icinga.com/docs/icinga-db/latest/doc/01-About/' \
+LABEL org.opencontainers.image.documentation='https://icinga.com/docs/icinga-db' \
       org.opencontainers.image.source='https://github.com/Icinga/icingadb' \
       org.opencontainers.image.licenses='GPL-2.0+'
 
