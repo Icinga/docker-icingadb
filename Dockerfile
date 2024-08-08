@@ -37,6 +37,7 @@ FROM scratch
 
 LABEL org.opencontainers.image.documentation='https://icinga.com/docs/icinga-db' \
       org.opencontainers.image.source='https://github.com/Icinga/icingadb' \
+      org.opencontainers.image.url='https://github.com/Icinga/docker-icingadb' \
       org.opencontainers.image.licenses='GPL-2.0-or-later' \
       org.opencontainers.image.title='Icinga DB' \
       org.opencontainers.image.vendor='Icinga GmbH'
