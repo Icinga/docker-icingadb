@@ -37,7 +37,7 @@ FROM scratch
 
 LABEL org.opencontainers.image.documentation='https://icinga.com/docs/icinga-db' \
       org.opencontainers.image.source='https://github.com/Icinga/icingadb' \
-      org.opencontainers.image.licenses='GPL-2.0+'
+      org.opencontainers.image.licenses='GPL-2.0-or-later'
 
 COPY --from=base /rootfs/ /
 COPY --from=base --chown=icingadb:icingadb /empty /etc/icingadb
