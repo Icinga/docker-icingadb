@@ -2,6 +2,9 @@
 
 # Icinga DB - Docker image
 
+> [!NOTE]
+> With the release of Icinga DB [v1.3.0](https://github.com/Icinga/icingadb/releases/tag/v1.3.0), everything container-related was moved in the [main repository](https://github.com/Icinga/icingadb).
+
 This image integrates [Icinga DB] into your [Docker] environment.
 
 ## Usage
